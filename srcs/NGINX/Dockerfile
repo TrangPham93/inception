@@ -1,13 +1,14 @@
 FROM alpine:3.22
-WORKDIR /the/workdir/path
 
 # Install the application dependencies
-RUN apt-get -y update && apt-get -y install nginx
+RUN  apk add --no-cache nginx && mkdir -p /run/nginx
 
 # Copy in the source code
-COPY files/index.html usr/share/nginx/html/index.html
-EXPOSE 443
+COPY files/default /etc/nginx/http.d/default.conf
+COPY files/index.html /usr/share/nginx/html/index.html
+
+EXPOSE 80
 
 
 # 
-CMD [ "usr/sbin/nginx", "-g", "deamon off;" ]
+CMD [ "/usr/sbin/nginx", "-g", "daemon off;" ]

@@ -6,10 +6,10 @@ RUN mkdir -p /etc/nginx/certs
 
 
 # Copy in the source code
-COPY certs/server.crt /etc/nginx/certs/server.crt
-COPY certs/server.key /etc/nginx/certs/server.key
-COPY files/default.conf /etc/nginx/http.d/default.conf
-COPY files/index.html /usr/share/nginx/html/index.html
+COPY tools/server.crt /etc/nginx/certs/server.crt
+COPY tools/server.key /etc/nginx/certs/server.key
+COPY conf/default.conf /etc/nginx/http.d/default.conf
+COPY conf/index.html /usr/share/nginx/html/index.html
 
 EXPOSE 443
 

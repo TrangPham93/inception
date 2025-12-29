@@ -1,7 +1,36 @@
 # version: '3.7'
 services:
+  
+  db:
+    image: mydb
+    container_name: wordpressdb
+    expose:
+      - 3306 #default port of mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD: rootpass
+      - MYSQL_DATABASE: wordpress
+      - MYSQL_USER: wp_user
+      - MYSQL_PASSWORD: wp_pass
+    volumes:
+      -/data/mysql:/var/lib/mysql
+      
+  wordpress:
+    image: my-wordpress
+    ports:
+      -9000:443
+    depends_on:
+      - db
+    restart: always
+    links:
+      - db
+    volumes:
+      - /data/html:/var/www/html
+
   web:
     build: requirements/nginx/.
     image: my-nginx-tls
     ports:
       - "443:443"
+    links:
+      - wordpress

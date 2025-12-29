@@ -13,5 +13,8 @@ COPY files/index.html /usr/share/nginx/html/index.html
 
 EXPOSE 443
 
+# allow nginx to own and access to this file inside the container
+RUN chown -R nginx:nginx /usr/share/nginx/html \
+    && chmod -R 755 /usr/share/nginx/html
 
 CMD [ "/usr/sbin/nginx", "-g", "daemon off;" ]

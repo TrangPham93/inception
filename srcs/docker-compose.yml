@@ -1,8 +1,7 @@
 # version: '3.7'
 services:
   web:
+    build: NGINX/.
     image: my-nginx-tls
     ports:
       - "443:443"
-    volumes:
-      - ./app:/usr/share/nginx/html

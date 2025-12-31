@@ -1,0 +1,5 @@
+.env
+/certbot-etc
+/dbdata
+/nginx
+/wordpress

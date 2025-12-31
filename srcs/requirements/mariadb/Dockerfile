@@ -1,7 +1,7 @@
 FROM alpine:3.22
 
-# Install the application dependencies
-RUN	apk add --no-cache mariadb-server
+# Install MariaDB server
+RUN	apk add --no-cache mysql-server
 
 ARG mariadb-configuration-file
 

@@ -1,20 +1,11 @@
-FROM alpine:3.22
+# PHP
+# PHP-FPM
+# Required PHP extensions (mysqli, pdo_mysql, etc.)
+# WordPress source files
+FROM wordpress:apache
 
-# Install the application dependencies
-RUN	apk add --no-cache nginx && mkdir -p /run/nginx
-RUN mkdir -p /etc/nginx/certs
-
-
-# Copy in the source code
-COPY tools/server.crt /etc/nginx/certs/server.crt
-COPY tools/server.key /etc/nginx/certs/server.key
-COPY conf/default.conf /etc/nginx/http.d/default.conf
-COPY conf/index.html /usr/share/nginx/html/index.html
-
-EXPOSE 443
-
-# allow nginx to own and access to this file inside the container
-RUN chown -R nginx:nginx /usr/share/nginx/html \
-    && chmod -R 755 /usr/share/nginx/html
-
-CMD [ "/usr/sbin/nginx", "-g", "daemon off;" ]
+RUN set -eux; \
+	find /etc/apache2 -name '*.conf' -type f -exec sed -ri -e "s!/var/www/html!$PWD!g" -e "s!Directory /var/www/!Directory $PWD!g" '{}' +; \
+	cp -s wp-config-docker.php wp-config.php
+COPY custom-theme/ ./wp-content/themes/custom-theme/
+COPY custom-plugin/ ./wp-content/plugins/custom-plugin/

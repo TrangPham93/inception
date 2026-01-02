@@ -1,4 +1,3 @@
-# version: '3'
 services:
 
   db:
@@ -6,38 +5,46 @@ services:
     image: mysql:8.0
     container_name: db
     restart: always
-    env_file:
-      - .env
     ports:
       - "3306:3306" #default port of mysql
     environment:
-      - MYSQL_DATABASE=wordpress
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
     volumes:
       - ./requirements/mariadb/data:/var/lib/mysql
     command: '--default-authentication-plugin=mysql_native_password'
     networks:
       - app-network
+    secrets:
+      - db_password
+      - db_root_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
      
   wordpress:
     # build: requirements/wordpress/.
     image: wordpress:5.1.1-fpm-alpine
     container_name: wordpress
     restart: always
-    env_file:
-      - .env
-    # ports:
-    #   - 9000:9000
     environment:
-      - WORDPRESS_DB_HOST=db:3306
-      - WORDPRESS_DB_USER=$MYSQL_USER
-      - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
-      - WORDPRESS_DB_NAME=wordpress
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - ./requirements/wordpress/data:/var/www/html
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - app-network
+    secrets:
+      - db_password
 
  
   webserver:
@@ -54,15 +61,15 @@ services:
     networks:
       - app-network
 
-
-# volumes:
-#   certbot-etc:
-#   wordpress:
-#   dbdata:
-
 networks:
   app-network:
     driver: bridge
+
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
 
   # nginx:
   #   build: requirements/nginx/.

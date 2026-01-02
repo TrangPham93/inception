@@ -1,5 +1,2 @@
 .env
-/certbot-etc
-/dbdata
-/nginx
-/wordpress
+/srcs/requirements/mariadb/data/

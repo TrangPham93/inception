@@ -8,7 +8,8 @@ RUN mkdir -p /etc/nginx/certs
 # Copy in the source code
 COPY tools/server.crt /etc/nginx/certs/server.crt
 COPY tools/server.key /etc/nginx/certs/server.key
-COPY conf/default.conf /etc/nginx/http.d/default.conf
+# alpine nginx mount to http.d, but nginx standard mount to conf.d
+COPY conf/default.conf /etc/nginx/http.d/default.conf 
 COPY conf/index.html /usr/share/nginx/html/index.html
 
 EXPOSE 443

@@ -1,4 +1,4 @@
-# version: '4'
+# version: '3'
 services:
 
   db:
@@ -13,7 +13,7 @@ services:
     environment:
       - MYSQL_DATABASE=wordpress
     volumes:
-      - ./dbdata:/var/lib/mysql
+      - ./requirements/mariadb/data:/var/lib/mysql
     command: '--default-authentication-plugin=mysql_native_password'
     networks:
       - app-network
@@ -33,7 +33,7 @@ services:
       - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
       - WORDPRESS_DB_NAME=wordpress
     volumes:
-      - wordpress:/var/www/html
+      - ./requirements/wordpress/data:/var/www/html
     depends_on:
       - db
     networks:
@@ -45,30 +45,20 @@ services:
     image: my-nginx-tls
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - ./wordpress:/var/www/html
-      - ./nginx/conf:/etc/nginx/conf.d
-      - ./certbot-etc:/etc/letsencrypt
+      - ./requirements/wordpress/data:/var/www/html
+      - ./requirements/nginx/conf:/etc/nginx/http.d
     depends_on:
       - wordpress
     networks:
       - app-network
 
-  certbot:
-    depends_on:
-      - webserver
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - certbot-etc:/etc/letsencrypt
-      - wordpress:/var/www/html
-    command: certonly --webroot --webroot-path=/var/www/html --email trpham@trpham.42.fr --agree-tos --no-eff-email --staging -d trpham.42.fr -d www.trpham.42.fr
 
-
-volumes:
-  certbot-etc:
-  wordpress:
-  dbdata:
+# volumes:
+#   certbot-etc:
+#   wordpress:
+#   dbdata:
 
 networks:
   app-network:

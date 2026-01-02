@@ -14,6 +14,9 @@ up:
 down:
 	docker compose -f $(DOCKER_COMPOSE) down
 
+ps:
+	docker compose -f $(DOCKER_COMPOSE) ps
+
 clean: down
 
 fclean: clean

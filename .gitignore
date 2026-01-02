@@ -1,2 +1,3 @@
-.env
+/srcs/.env
+/secrets
 /srcs/requirements/mariadb/data/

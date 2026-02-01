@@ -91,3 +91,18 @@ No, the setup is designed for data persistence using named volumes.
     The certbot-etc volume stores your SSL certificates.
 
 These volumes are managed by Docker on the host filesystem and are independent of the container’s lifecycle. This means you can stop, remove, or recreate the containers without losing any of your data.
+
+- DNS (Domain Name System) is the internet's phonebook, translating human-friendly website names (like google.com) into numerical IP addresses (like 142.250.186.46) that computers use to find and connect to each other, making the web accessible without memorizing complex numbers
+
+- need to match : trpham.42.fr to localhost in local machine
+
+# Set up and validating an SSH(secure shell) connection
+- SSH let you open a terminal section on another machine
+- over secure, encrypted connection
+´´´ ssh localhost -p 22´´´
+- 
+
+# virtual machine set up
+root password: trpham4142
+user: trpham. trpham4142
+

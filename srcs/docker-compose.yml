@@ -8,18 +8,15 @@ services:
     ports:
       - "3306:3306" #default port of mysql
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD_FILE: /run/secrets/db_password
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_DATABASE: ${WORDPRESS_DATABASE_NAME}
+      MYSQL_USER: ${WORDPRESS_DATABASE_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DATABASE_USER}
+      MYSQL_ROOT_PASSWORD:  ${MYSQL_ROOT_PASSWORD}
     volumes:
       - ./requirements/mariadb/data:/var/lib/mysql
     command: '--default-authentication-plugin=mysql_native_password'
     networks:
       - app-network
-    secrets:
-      - db_password
-      - db_root_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
@@ -33,9 +30,9 @@ services:
     restart: always
     environment:
       WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
-      WORDPRESS_DB_USER: ${MYSQL_USER}
-      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
+      WORDPRESS_DB_NAME: ${WORDPRESS_DATABASE_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DATABASE_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DATABASE_USER}
     volumes:
       - ./requirements/wordpress/data:/var/www/html
     depends_on:
@@ -43,8 +40,8 @@ services:
         condition: service_healthy
     networks:
       - app-network
-    secrets:
-      - db_password
+    # secrets:
+    #   - db_password
 
  
   webserver:
@@ -65,11 +62,11 @@ networks:
   app-network:
     driver: bridge
 
-secrets:
-  db_password:
-    file: ../secrets/db_password.txt
-  db_root_password:
-    file: ../secrets/db_root_password.txt
+# secrets:
+#   db_password:
+#     file: ../secrets/db_password.txt
+#   db_root_password:
+#     file: ../secrets/db_root_password.txt
 
   # nginx:
   #   build: requirements/nginx/.

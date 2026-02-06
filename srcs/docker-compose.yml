@@ -1,20 +1,18 @@
 services:
 
   db:
-    # build: requirements/mariadb/.
-    image: mysql:8.0
+    build: requirements/mariadb
     container_name: db
     restart: always
     ports:
       - "3306:3306" #default port of mysql
     environment:
-      MYSQL_DATABASE: ${WORDPRESS_DATABASE_NAME}
-      MYSQL_USER: ${WORDPRESS_DATABASE_USER}
-      MYSQL_PASSWORD: ${WORDPRESS_DATABASE_USER}
+      WORDPRESS_DATABASE_NAME: ${WORDPRESS_DATABASE_NAME}
+      WORDPRESS_DATABASE_USER: ${WORDPRESS_DATABASE_USER}
+      WORDPRESS_DATABASE_USER_PASSWORD: ${WORDPRESS_DATABASE_USER_PASSWORD}
       MYSQL_ROOT_PASSWORD:  ${MYSQL_ROOT_PASSWORD}
     volumes:
-      - ./requirements/mariadb/data:/var/lib/mysql
-    command: '--default-authentication-plugin=mysql_native_password'
+      - mariadb:/var/lib/mysql
     networks:
       - app-network
     healthcheck:
@@ -32,14 +30,19 @@ services:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_NAME: ${WORDPRESS_DATABASE_NAME}
       WORDPRESS_DB_USER: ${WORDPRESS_DATABASE_USER}
-      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DATABASE_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DATABASE_USER_PASSWORD}
     volumes:
-      - ./requirements/wordpress/data:/var/www/html
+      - wordpress:/home/trpham/data/wordpress
     depends_on:
       db:
         condition: service_healthy
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     # secrets:
     #   - db_password
 
@@ -62,11 +65,9 @@ networks:
   app-network:
     driver: bridge
 
-# secrets:
-#   db_password:
-#     file: ../secrets/db_password.txt
-#   db_root_password:
-#     file: ../secrets/db_root_password.txt
+volumes:
+  mariadb:
+  wordpress:
 
   # nginx:
   #   build: requirements/nginx/.

@@ -1,88 +1,75 @@
 services:
-
   db:
-    build: requirements/mariadb
-    container_name: db
+    container_name: mariadb
+    build: ./requirements/mariadb
+    image: inception-mariadb
     restart: always
-    ports:
-      - "3306:3306" #default port of mysql
-    environment:
-      WORDPRESS_DATABASE_NAME: ${WORDPRESS_DATABASE_NAME}
-      WORDPRESS_DATABASE_USER: ${WORDPRESS_DATABASE_USER}
-      WORDPRESS_DATABASE_USER_PASSWORD: ${WORDPRESS_DATABASE_USER_PASSWORD}
-      MYSQL_ROOT_PASSWORD:  ${MYSQL_ROOT_PASSWORD}
+    env_file:
+      - .env
     volumes:
       - mariadb:/var/lib/mysql
     networks:
-      - app-network
+      - network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      test: [
+        "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
      
   wordpress:
-    # build: requirements/wordpress/.
-    image: wordpress:5.1.1-fpm-alpine
     container_name: wordpress
+    # build: ./requirements/wordpress
+    image: wordpress:5.1.1-fpm-alpine
     restart: always
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_NAME: ${WORDPRESS_DATABASE_NAME}
-      WORDPRESS_DB_USER: ${WORDPRESS_DATABASE_USER}
-      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DATABASE_USER_PASSWORD}
+    env_file:
+      - .env
     volumes:
-      - wordpress:/home/trpham/data/wordpress
+      - wordpress:/var/www/html
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    # secrets:
-    #   - db_password
+      - network
 
- 
-  webserver:
-    # build: requirements/nginx/.
-    image: my-nginx-tls
+  nginx:
+    build: ./requirements/nginx
+    image: inception-nginx
+    restart: always
     ports:
-      - "80:80"
+      # - "80:80"
       - "443:443"
     volumes:
-      - ./requirements/wordpress/data:/var/www/html
-      - ./requirements/nginx/conf:/etc/nginx/http.d
+      - wordpress:/var/www/html
     depends_on:
       - wordpress
     networks:
-      - app-network
+      - network
 
 networks:
-  app-network:
+  network:
+    name: docker-network
     driver: bridge
 
 volumes:
   mariadb:
+    name: mariadb
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/trang/data/mariadb #need to change to trpham for VM
   wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/trang/data/wordpress #need to change to trpham for VM
 
-  # nginx:
-  #   build: requirements/nginx/.
-  #   image: my-nginx-tls
-  #   ports:
-  #     - "443:443"
-  #   volumes:
-  #     -/nginx:/etc/nginx/conf.d
-  #     -/logs/nginx:/var/log/nginx
-  #     -/wordpress:/var/www/html
-  #   links:
-  #     - wordpress
-  #   restart: always
-  #   depends_on:
-  #     - wordpress
+  
 
  
  

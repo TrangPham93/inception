@@ -1,21 +1,21 @@
 FROM alpine:3.22
 
 # Install the application dependencies
-RUN	apk add --no-cache nginx && mkdir -p /run/nginx
+RUN apk update && apk add nginx openssl
+
+EXPOSE 443 
+
 RUN mkdir -p /etc/nginx/certs
+RUN openssl req -x509 -nodes \
+    -out /etc/nginx/certs/public_certificate.crt \
+    -keyout /etc/nginx/certs/private.key \
+    -subj "/C=FI/ST=Uusimaa/L=Helsinki/O=42/OU=Hive/CN=trpham.42.fr"
 
+# Create a new user (www-data) for running Nginx
+RUN adduser -D -H -s /sbin/nologin -g www-data -G www-data www-data
 
-# Copy in the source code
-COPY tools/server.crt /etc/nginx/certs/server.crt
-COPY tools/server.key /etc/nginx/certs/server.key
-# alpine nginx mount to http.d, but nginx standard mount to conf.d
-COPY conf/default.conf /etc/nginx/http.d/default.conf 
-COPY conf/index.html /usr/share/nginx/html/index.html
+# Copy Nginx configuration file
+COPY ./conf/nginx.conf /etc/nginx/nginx.conf 
+RUN chmod 664 /etc/nginx/nginx.conf
 
-EXPOSE 443
-
-# allow nginx to own and access to this file inside the container
-RUN chown -R nginx:nginx /usr/share/nginx/html \
-    && chmod -R 755 /usr/share/nginx/html
-
-CMD [ "/usr/sbin/nginx", "-g", "daemon off;" ]
+CMD ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;" ]

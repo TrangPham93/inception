@@ -3,6 +3,8 @@ FROM alpine:3.22
 # Install MariaDB database and client tools
 RUN	apk update && apk add mariadb mariadb-client
 
+RUN rm -f /etc/my.cnf || true
+
 COPY conf/mariadb.cnf /etc/my.cnf.d/mariadb.cnf
 RUN chmod 664 /etc/my.cnf.d/mariadb.cnf
 

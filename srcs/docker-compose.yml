@@ -18,23 +18,8 @@ services:
       timeout: 5s
       retries: 5
 
-     
-  wordpress:
-    container_name: wordpress
-    # build: ./requirements/wordpress
-    image: wordpress:5.1.1-fpm-alpine
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - wordpress:/var/www/html
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - network
-
   nginx:
+    container_name: nginx
     build: ./requirements/nginx
     image: inception-nginx
     restart: always
@@ -45,6 +30,21 @@ services:
       - wordpress:/var/www/html
     depends_on:
       - wordpress
+    networks:
+      - network
+     
+  wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress
+    image: inception-wordpress
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - wordpress:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - network
 

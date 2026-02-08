@@ -1,8 +1,22 @@
 [mysqld]
+user = mysql
+datadir = /var/lib/mysql
+socket = /run/mysqld/mysqld.sock
+pid-file = /run/mysqld/mysqld.pid
 bind-address = 0.0.0.0
 port = 3306
+skip-networking = 0
 
 character-set-server = utf8mb4
 collation-server = utf8mb4_general_ci
 
 skip-name-resolve
+
+
+[client]
+port = 3306
+socket = /run/mysqld/mysqld.sock
+
+[mysql]
+port = 3306
+socket = /run/mysqld/mysqld.sock

@@ -60,14 +60,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/trang/data/mariadb #need to change to trpham for VM
+      device: /home/trpham/data/mariadb #need to change to trpham for VM
   wordpress:
     name: wordpress
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/trang/data/wordpress #need to change to trpham for VM
+      device: /home/trpham/data/wordpress #need to change to trpham for VM
 
   
 

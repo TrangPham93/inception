@@ -17,9 +17,6 @@ down:
 ps:
 	docker compose -f $(DOCKER_COMPOSE) ps
 
-# logs:
-# 	docker compose -f $(DOCKER_COMPOSE) logs
-
 clean: down
 
 fclean: clean

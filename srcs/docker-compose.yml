@@ -32,6 +32,8 @@ services:
       - wordpress
     networks:
       - network
+    extra_hosts:
+      - "trpham.42.fr:127.0.0.1"
      
   wordpress:
     container_name: wordpress
@@ -60,14 +62,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/trang/data/mariadb #need to change to trpham for VM
+      device: /home/trpham/data/mariadb #need to change to trpham for VM
   wordpress:
     name: wordpress
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/trang/data/wordpress #need to change to trpham for VM
+      device: /home/trpham/data/wordpress #need to change to trpham for VM
 
   
 

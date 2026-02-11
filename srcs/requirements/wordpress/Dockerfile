@@ -1,8 +1,4 @@
-# PHP
-# PHP-FPM
-# Required PHP extensions (mysqli, pdo_mysql, etc.)
-# WordPress source files
-FROM alpine:3.22
+FROM alpine:3.19
 
 RUN apk update && apk add mariadb-client \
     php83 \

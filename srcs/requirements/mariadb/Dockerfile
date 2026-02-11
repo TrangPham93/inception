@@ -1,4 +1,4 @@
-FROM alpine:3.22
+FROM alpine:3.19
 
 # Install MariaDB database and client tools
 RUN	apk update && apk add mariadb mariadb-client

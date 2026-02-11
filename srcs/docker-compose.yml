@@ -55,14 +55,14 @@ networks:
 
 volumes:
   mariadb:
-    name: mariadb
+    name: mariadb-data
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /home/trpham/data/mariadb #need to change to trpham for VM
   wordpress:
-    name: wordpress
+    name: wordpress-data
     driver: local
     driver_opts:
       type: none

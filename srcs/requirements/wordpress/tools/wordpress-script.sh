@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -e
-
 echo "==> Setting up WordPress..."
 echo "memory_limit = 512M" >> /etc/php83/php.ini
 
@@ -11,6 +9,9 @@ echo "Downloading WordPress client (WP-CLI) and renaming wp-cli.phar to wp"
 wget -q https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/local/bin/wp || { echo "Failed to download wp-cli.phar"; exit 1; }
 
 chmod +x /usr/local/bin/wp
+
+# chown -R www-data:www-data /var/www/html
+# chmod -R 755 /var/www/html/
 
 echo "Waiting for MariaDB to be ready"
 mariadb-admin ping --protocol=tcp --host=mariadb -u $WORDPRESS_DATABASE_USER --password=$WORDPRESS_DATABASE_USER_PASSWORD --wait=300

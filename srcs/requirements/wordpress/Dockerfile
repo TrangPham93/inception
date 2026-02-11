@@ -1,4 +1,4 @@
-FROM alpine:3.19
+FROM alpine:3.20.6
 
 RUN apk update && apk add mariadb-client \
     php83 \
@@ -9,6 +9,9 @@ RUN apk update && apk add mariadb-client \
 	php83-iconv \
     php83-json \
 	wget 
+
+# RUN  ln -s /usr/bin/php83 /usr/bin/php
+
 
 # Create a www-data user
 RUN adduser -D -H -s /sbin/nologin -g www-data -G www-data www-data

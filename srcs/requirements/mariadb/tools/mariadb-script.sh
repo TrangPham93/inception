@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# make the script stop immediately if any cmd fails
-set -e
-
 chmod -R 755 /var/lib/mysql
 
 mkdir -p /run/mysqld

@@ -16,10 +16,9 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 	# pipe SQL into MariaDB during bootstrap.
 	mysqld --user=mysql --bootstrap << EOF
 USE mysql;
-FLUSH PRIVILEGES;
 
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-
+FLUSH PRIVILEGES;
 
 CREATE DATABASE IF NOT EXISTS ${WORDPRESS_DATABASE_NAME};
 CREATE USER IF NOT EXISTS ${WORDPRESS_DATABASE_USER}@'%' IDENTIFIED BY '${WORDPRESS_DATABASE_USER_PASSWORD}';
@@ -32,6 +31,8 @@ else
 fi
 
 echo "Starting MariaDB..."
+
+sleep 5
 # --console outputs logs to stdout so Docker can show logs
 exec mariadbd --user=mysql --console
 ### ALTER USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';

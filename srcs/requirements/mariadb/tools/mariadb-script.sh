@@ -17,8 +17,6 @@ if [ ! -d "${DATADIR}/mysql" ]; then
 	mariadb-install-db --basedir=/usr --user=mysql --datadir="${DATADIR}" --skip-test-db
 fi
 
-# USE mysql;
-
 echo "Preparing init SQL"
 cat > "${INIT_FILE}" << EOF
 

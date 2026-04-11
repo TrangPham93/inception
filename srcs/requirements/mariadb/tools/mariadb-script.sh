@@ -5,7 +5,7 @@ set -e
 DATADIR="/var/lib/mysql"
 RUNDIR="/run/mysqld"
 LOGDIR="/var/log/mysql"
-CONFIG_FILE="/etc/my.cnf.d/mariadb_config.cnf"
+CONFIG_FILE="/etc/my.cnf.d/mariadb.cnf"
 INIT_FILE="${DATADIR}/init.sql"
 
 mkdir -p "${DATADIR}" "${RUNDIR}" "${LOGDIR}"
@@ -17,7 +17,7 @@ if [ ! -d "${DATADIR}/mysql" ]; then
 	mariadb-install-db --basedir=/usr --user=mysql --datadir="${DATADIR}" --skip-test-db
 fi
 
-USE mysql;
+# USE mysql;
 
 echo "Preparing init SQL"
 cat > "${INIT_FILE}" << EOF

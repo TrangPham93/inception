@@ -1,4 +1,4 @@
-- Oracle VirtualBox is a so-called hosted hypervisor, While several hypervisors can normally be installed in parallel, do not attempt to run virtual machines from competing hypervisors at the same time. Oracle VirtualBox cannot track what another hypervisor is currently attempting to do on the same host, and especially if several products attempt to use hardware virtualization features such as VT-x, this can crash the entire host.
+<!-- - Oracle VirtualBox is a so-called hosted hypervisor, While several hypervisors can normally be installed in parallel, do not attempt to run virtual machines from competing hypervisors at the same time. Oracle VirtualBox cannot track what another hypervisor is currently attempting to do on the same host, and especially if several products attempt to use hardware virtualization features such as VT-x, this can crash the entire host.
 - VMs can easily be imported and exported using the Open Virtualization Format (OVF).
 - Docker compose is a tool that allows you to define and manage multiple Docker containers simultaneously. If your app needs multiple services (like a web server, a database, and a caching service), Docker Compose helps you define and manage all these services together.
     Docker: You create individual containers for each part of your application. For example, one container for the web server, one for the database, and another for the caching service.
@@ -105,4 +105,79 @@ These volumes are managed by Docker on the host filesystem and are independent o
 # virtual machine set up
 root password: trpham4142
 user: trpham. trpham4142
+ -->
 
+# 🐳 Inception - Docker Infrastructure Project
+
+## 📌 Overview
+
+**Inception** is a system administration project from 42 School focused on building a small infrastructure using **Docker** and **Docker Compose**.
+
+The goal is to set up multiple services (MariaDB, WordPress, NGINX) inside containers, ensuring they work together through a secure and reproducible environment.
+
+---
+
+## 🧱 Architecture
+
+The project consists of:
+
+- 🛢 **MariaDB** — database server
+- 🌐 **NGINX** — web server with HTTPS (TLS)
+- 📝 **WordPress** — CMS powered by PHP-FPM
+
+All services are orchestrated using **Docker Compose** and connected via a custom bridge network.
+
+---
+
+## ⚙️ Technologies Used
+
+- Docker & Docker Compose
+- Alpine Linux
+- NGINX
+- MariaDB
+- PHP-FPM
+- OpenSSL (for HTTPS)
+
+---
+
+## 🖥 Virtual Machine Notes
+
+- This project runs inside a VM (e.g., **Oracle VirtualBox**)
+- VirtualBox is a **hosted hypervisor**
+- ⚠️ Do NOT run multiple hypervisors simultaneously (can crash host due to VT-x conflicts)
+- VMs can be imported/exported using **OVF (Open Virtualization Format)**
+
+---
+
+## 🐳 Docker Concepts
+
+### 🔹 Docker Images
+- Read-only templates used to create containers
+- Built using a `Dockerfile`
+- Immutable (cannot be modified after creation)
+- Composed of layered filesystems
+
+### 🔹 Docker Containers
+- Running instances of images
+- Isolated environments
+
+### 🔹 Docker Compose
+- Tool to define and run multi-container apps
+- Uses a `docker-compose.yml` file
+
+Example:
+
+```bash
+docker compose up -d
+
+
+## Project Structure
+.
+├── srcs/
+│   ├── docker-compose.yml
+│   ├── requirements/
+│   │   ├── mariadb/
+│   │   ├── nginx/
+│   │   └── wordpress/
+├── Makefile
+└── .env

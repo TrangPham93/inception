@@ -39,6 +39,8 @@ services:
       - wordpress
     networks:
       - network
+    extra_hosts:
+      - "trpham.42.fr:127.0.0.1"
      
   wordpress:
     container_name: wordpress

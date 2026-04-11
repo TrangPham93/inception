@@ -18,11 +18,10 @@ wordpress_data:
 
 # looking for -f file .yml in the srcs dir
 build:
-# 	sudo chmod -R 775 $(DATA_DIR)
 	docker compose -f $(DOCKER_COMPOSE) build
 
 up:
-	docker compose -f $(DOCKER_COMPOSE) up --build -d
+	docker compose -f $(DOCKER_COMPOSE) up -d
 
 down:
 	docker compose -f $(DOCKER_COMPOSE) down

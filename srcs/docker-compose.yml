@@ -1,29 +1,36 @@
 services:
-  db:
+  mariadb:
     container_name: mariadb
     build: ./requirements/mariadb
     image: mariadb
-    restart: always
+    restart: unless-stopped
     env_file:
-      - .env
+      - ./.env
     volumes:
       - mariadb:/var/lib/mysql
     networks:
       - network
     healthcheck:
       test: [
-        "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$MYSQL_ROOT_PASSWORD || exit 1"
+        "CMD",
+          "mariadb-admin",
+          "ping",
+          "-h",
+          "localhost",
+          "-P",
+          "3306",
+          "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"
         ]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
+      retries: 10
+      start_period: 60s
 
   nginx:
     container_name: nginx
     build: ./requirements/nginx
     image: nginx
-    restart: always
+    restart: unless-stopped
     ports:
       - "443:443"
     volumes:
@@ -32,23 +39,28 @@ services:
       - wordpress
     networks:
       - network
-    extra_hosts:
-      - "trpham.42.fr:127.0.0.1"
+    # extra_hosts:
+    #   - "trpham.42.fr:127.0.0.1"
      
   wordpress:
     container_name: wordpress
     build: ./requirements/wordpress
     image: wordpress
-    restart: always
+    restart: unless-stopped
     env_file:
-      - .env
+      - ./.env
     volumes:
       - wordpress:/var/www/html
     depends_on:
-      db:
+      mariadb:
         condition: service_healthy
     networks:
       - network
+    healthcheck:
+      test: ["CMD", "test", "-f", "/var/www/html/wp-login.php"]
+      interval: 5s
+      timeout: 60s
+      retries: 10
 
 networks:
   network:

@@ -1,28 +1,14 @@
 FROM alpine:3.22.3
 
-# # Install MariaDB database and client tools
-# RUN	apk update && apk add mariadb mariadb-client
+# Install MariaDB database and client tools
+RUN	apk update && apk add mariadb mariadb-client
 
-# RUN rm -f /etc/my.cnf || true
+RUN rm -f /etc/my.cnf || true
 
-# COPY conf/mariadb.cnf /etc/my.cnf.d/mariadb.cnf
-# RUN chmod 664 /etc/my.cnf.d/mariadb.cnf
+COPY conf/mariadb.cnf /etc/my.cnf.d/mariadb.cnf
+RUN chmod 664 /etc/my.cnf.d/mariadb.cnf
 
-# COPY tools/mariadb-script.sh /usr/local/bin/mariadb-script.sh 
-# RUN chmod +x /usr/local/bin/mariadb-script.sh
-
-# EXPOSE 3306
-
-# ENTRYPOINT ["/usr/local/bin/mariadb-script.sh"]
- 
-FROM debian:bullseye
-
-RUN apt-get update && apt-get install -y \
-    mariadb-server \
-    mariadb-client \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY tools/mariadb-script.sh /usr/local/bin/
+COPY tools/mariadb-script.sh /usr/local/bin/mariadb-script.sh 
 RUN chmod +x /usr/local/bin/mariadb-script.sh
 
 EXPOSE 3306

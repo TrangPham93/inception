@@ -1,81 +1,52 @@
-# #!/bin/sh
-
-# chown -R mysql:mysql /var/lib/mysql /run/mysqld
-# chmod 750 /var/lib/mysql
-
-# mkdir -p /run/mysqld
-
-# chown -R mysql:mysql /var/lib/mysql /run/mysqld
-
-# # Initialize database if empty
-# if [ ! -d "/var/lib/mysql/mysql" ]; then
-# 	echo "Initializing MariaDB database..."
-# 	mariadb-install-db --basedir=/usr --user=mysql --datadir=/var/lib/mysql
-
-# 	# set up root password and create database/user
-# 	echo "==> Creating WordPress database and user..."
-# 	# pipe SQL into MariaDB during bootstrap.
-# 	mysqld --user=mysql --bootstrap << EOF
-# USE mysql;
-
-# ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-# FLUSH PRIVILEGES;
-
-# CREATE DATABASE IF NOT EXISTS ${WORDPRESS_DATABASE_NAME};
-# CREATE USER IF NOT EXISTS ${WORDPRESS_DATABASE_USER}@'%' IDENTIFIED BY '${WORDPRESS_DATABASE_USER_PASSWORD}';
-# GRANT ALL PRIVILEGES ON ${WORDPRESS_DATABASE_NAME}.* TO ${WORDPRESS_DATABASE_USER}@'%';
-# FLUSH PRIVILEGES;
-# EOF
-
-# else
-#     echo "==> MariaDB is already installed. Database and users are configured."
-# fi
-
-# echo "Starting MariaDB..."
-
-# sleep 5
-# # --console outputs logs to stdout so Docker can show logs
-# exec mariadbd --user=mysql --console
-# ### ALTER USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-
 #!/bin/sh
 
 set -e
 
-echo "==> Fixing permissions..."
-mkdir -p /run/mysqld
-chown -R mysql:mysql /var/lib/mysql /run/mysqld
-chmod 750 /var/lib/mysql
+DATADIR="/var/lib/mysql"
+RUNDIR="/run/mysqld"
+LOGDIR="/var/log/mysql"
+CONFIG_FILE="/etc/my.cnf.d/mariadb_config.cnf"
+INIT_FILE="${DATADIR}/init.sql"
 
-# Initialize DB if not exists
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "==> Initializing database..."
-    mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+mkdir -p "${DATADIR}" "${RUNDIR}" "${LOGDIR}"
+chown -R mysql:mysql "${DATADIR}" "${RUNDIR}" "${LOGDIR}"
 
-    echo "==> Starting temporary MariaDB..."
-    mysqld --user=mysql --skip-networking &
-    pid="$!"
+# chmod 750 /var/lib/mysql
+# chown -R mysql:mysql /var/lib/mysql /run/mysqld
 
-    echo "==> Waiting for MariaDB..."
-    until mysqladmin ping --silent; do
-        sleep 1
-    done
+# Initialize database if empty
+if [ ! -d "${DATADIR}/mysql" ]; then
+	echo "Initializing MariaDB database..."
+	mariadb-install-db --basedir=/usr --user=mysql --datadir="${DATADIR} --skip-test-db"
+fi
+	# # set up root password and create database/user
+	# echo "==> Creating WordPress database and user..."
+	# # pipe SQL into MariaDB during bootstrap.
+	# mysqld --user=mysql --bootstrap << EOF
 
-    echo "==> Creating DB and users..."
-    mysql << EOF
+USE mysql;
+
+# FLUSH PRIVILEGES;
+echo "Preparing init SQL"
+cat > "${INIT_FILE}" << EOF
+
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-CREATE DATABASE IF NOT EXISTS ${WORDPRESS_DATABASE_NAME};
-CREATE USER IF NOT EXISTS '${WORDPRESS_DATABASE_USER}'@'%' IDENTIFIED BY '${WORDPRESS_DATABASE_USER_PASSWORD}';
-GRANT ALL PRIVILEGES ON ${WORDPRESS_DATABASE_NAME}.* TO '${WORDPRESS_DATABASE_USER}'@'%';
+CREATE DATABASE IF NOT EXISTS ${WORDPRESS_DATABASE_NAME} CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE USER IF NOT EXISTS ${WORDPRESS_DATABASE_USER}@'%' IDENTIFIED BY '${WORDPRESS_DATABASE_USER_PASSWORD}';
+GRANT ALL PRIVILEGES ON ${WORDPRESS_DATABASE_NAME}.* TO ${WORDPRESS_DATABASE_USER}@'%';
 FLUSH PRIVILEGES;
 EOF
 
-    echo "==> Shutting down temporary MariaDB..."
-    mysqladmin -uroot -p${MYSQL_ROOT_PASSWORD} shutdown
-    wait "$pid"
-else
-    echo "==> Database already initialized"
-fi
+chown mysql:mysql "${INIT_FILE}"
 
-echo "==> Starting MariaDB (final)..."
-exec mysqld --user=mysql --console
+echo "Starting MariaDB..."
+
+# sleep 5
+# --console outputs logs to stdout so Docker can show logs
+# exec mariadbd --user=mysql --console
+### ALTER USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+exec mariadbd --defaults-file="${CONFIG_FILE}" --init-file="${INIT_FILE}" --console
+
+
+
+

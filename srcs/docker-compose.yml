@@ -17,6 +17,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   nginx:
     container_name: nginx
@@ -61,14 +62,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/trpham/data/mariadb #need to change to trpham for VM
+      device: /home/trpham/data/mariadb
   wordpress:
     name: wordpress
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/trpham/data/wordpress #need to change to trpham for VM
+      device: /home/trpham/data/wordpress
 
   
 

@@ -1,4 +1,5 @@
-FROM alpine:3.20.6
+FROM alpine:3.22.3
+
 
 # Install the application dependencies
 RUN apk update && apk add nginx openssl

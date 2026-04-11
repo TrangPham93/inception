@@ -1,4 +1,4 @@
-FROM alpine:3.20.6
+FROM alpine:3.22.3
 
 RUN apk update && apk add mariadb-client \
     php83 \

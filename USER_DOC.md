@@ -1,94 +1,174 @@
-USER_DOC — User Documentation
-This document explains how to use the Inception infrastructure as an end user or administrator. No Docker knowledge is required.
+# USER_DOC — User Documentation
+
+This document explains how to use and operate the Inception infrastructure as an end user or administrator. No Docker knowledge is required.
+
 ---
-What services does this stack provide?
-The Inception project runs a fully functional WordPress website accessible over HTTPS. It is made up of three services working together:
-Service	Role
-NGINX	Web server — handles all incoming HTTPS connections and forwards requests to WordPress
-WordPress	The website application — where content is managed and served
-MariaDB	The database — stores all WordPress content, users, and settings
-All three run as Docker containers on the same machine and communicate over a private internal network. From the outside, only the NGINX container is accessible (port 443).
+
+## What services does this stack provide?
+
+The project runs a fully functional WordPress website accessible over HTTPS. Three services work together inside Docker containers:
+
+| Service | Role | Port |
+|---|---|---|
+| **NGINX** | Web server — the only door into the infrastructure. Handles all HTTPS connections and forwards PHP requests to WordPress. | 443 (public) |
+| **WordPress + php-fpm** | The website application. Manages content, users, and serves pages. | 9000 (internal only) |
+| **MariaDB** | The database. Stores all WordPress content, settings, and user accounts. | 3306 (internal only) |
+
+Only NGINX is reachable from outside. WordPress and MariaDB are only accessible to each other inside the private Docker network.
+
 ---
-Starting and stopping the project
-All commands are run from the root of the project directory on the host machine (your virtual machine).
-Start the project
+
+## Starting and stopping the project
+
+All commands are run from the **root of the project directory** on your virtual machine.
+
+### Start the project
+
 ```bash
 make
 ```
-This builds the Docker images (if not already built) and starts all containers. It may take a minute or two the first time.
-Stop the project
+
+On the first run this builds all Docker images and may take a few minutes. WordPress is also installed automatically during this first startup — wait until all three containers show as `Up` before opening your browser.
+
+### Stop the project (data preserved)
+
 ```bash
 make down
 ```
-This stops all containers. Your data (website content and database) is preserved.
-Full reset (removes all data)
+
+Stops all containers. Your website content and database are fully preserved and will be there when you start again.
+
+### Full reset (removes all data)
+
 ```bash
 make clean
 ```
-> **Warning:** this removes containers, images, and all stored data. The website will return to a blank state after the next `make`.
+
+> **Warning:** this removes all containers, images, and all stored data including the WordPress database and files. The next `make` will start from a completely blank state.
+
 ---
-Accessing the website
+
+## Accessing the website
+
 Once the project is running:
-Website: open your browser and go to:
+
+**Website:**
 ```
-https://<login>.42.fr
+https://trpham.42.fr
 ```
-You will likely see a browser warning about the certificate — this is expected because the project uses a self-signed TLS certificate. Click "Advanced" and proceed to the site.
-WordPress admin panel: go to:
+
+Your browser will show a warning about the certificate because the project uses a self-signed TLS certificate. This is expected. Click **Advanced** (or **Details**) and then **Proceed** to reach the site.
+
+**WordPress admin panel:**
 ```
-https://<login>.42.fr/wp-admin
+https://trpham.42.fr/wp-admin
 ```
-Log in with the administrator credentials (see below).
+
+Log in with the administrator credentials defined in `srcs/.env`.
+
 ---
-Credentials
-Credentials are stored locally in the `secrets/` directory at the root of the project. This directory is never committed to Git.
-What	File
-WordPress admin login	`secrets/credentials.txt`
-Database user password	`secrets/db_password.txt`
-Database root password	`secrets/db_root_password.txt`
-> **Important:** keep these files private. Do not share them or push them to any remote repository.
-The WordPress administrator username is set in `srcs/.env` under `WP_ADMIN_USER`. Note that it cannot contain the words `admin` or `administrator`.
+
+## Credentials
+
+All credentials are stored in `srcs/.env` at the root of the project. This file is never committed to Git.
+
+| What | Variable in .env |
+|---|---|
+| WordPress admin username | `WORDPRESS_ADMIN` |
+| WordPress admin password | `WORDPRESS_ADMIN_PASSWORD` |
+| WordPress admin email | `WORDPRESS_ADMIN_EMAIL` |
+| WordPress regular user | `WORDPRESS_USER` |
+| Database name | `WORDPRESS_DATABASE_NAME` |
+| Database user | `WORDPRESS_DATABASE_USER` |
+| Database user password | `WORDPRESS_DATABASE_USER_PASSWORD` |
+| Database root password | `MYSQL_ROOT_PASSWORD` |
+
+> Keep `srcs/.env` private. Never push it to any remote repository.
+
 ---
-Checking that services are running correctly
-Quick status check
+
+## Checking that services are running correctly
+
+### Quick status check
+
 ```bash
 docker ps
 ```
-You should see three containers listed — `nginx`, `wordpress`, and `mariadb` — all with status `Up`.
-Check if the website is responding
+
+You should see three containers — `mariadb`, `wordpress`, and `nginx` — all with status `Up`. On first startup, `wordpress` may show `starting` for a minute while it downloads and installs WordPress.
+
+### Check if the website responds
+
 ```bash
-curl -k https://<login>.42.fr
+curl -k https://trpham.42.fr
 ```
+
 If you get HTML back, the site is up. The `-k` flag skips certificate verification for self-signed certs.
-View logs for a specific service
+
+### View logs for a specific service
+
 ```bash
 docker logs nginx
 docker logs wordpress
 docker logs mariadb
 ```
-If a container keeps restarting, its logs will show the error message.
-Check a specific container is healthy
+
+If a container is crashing or behaving unexpectedly, its logs will show the reason.
+
+### Check a container's health status
+
 ```bash
+docker inspect --format='{{.State.Health.Status}}' mariadb
 docker inspect --format='{{.State.Status}}' nginx
 ```
-Expected output: `running`
+
+Expected output: `healthy` for mariadb, `running` for nginx and wordpress.
+
 ---
-Managing the WordPress site
-Once logged into the admin panel at `https://<login>.42.fr/wp-admin`, you can:
-Create and edit posts and pages
-Install themes and plugins
-Manage users (there must always be at least two users: the administrator and one regular user)
-Configure site settings
-Users
-The site has two default users:
-Administrator: full access to the admin panel. Username is defined in `srcs/.env` as `WP_ADMIN_USER`.
-Regular user: a standard editor/subscriber account. Username is defined as `WP_USER`.
-To add more users, go to Users → Add New in the WordPress admin panel.
+
+## Managing the WordPress site
+
+Once logged into `https://trpham.42.fr/wp-admin` as the administrator, you can:
+
+- Create and publish posts and pages under **Posts** and **Pages**
+- Install themes under **Appearance → Themes**
+- Install plugins under **Plugins → Add New**
+- Manage users under **Users**
+- Configure site settings under **Settings**
+
+### Users
+
+The site is set up with two users by default:
+
+| Role | Variable |
+|---|---|
+| Administrator | `WORDPRESS_ADMIN` — full admin panel access |
+| Author | `WORDPRESS_USER` — can write and publish posts |
+
+To add more users: go to **Users → Add New** in the admin panel.
+
 ---
-Troubleshooting
-Symptom	What to try
-Browser says "site can't be reached"	Run `docker ps` — check all containers are up; verify `/etc/hosts` has `127.0.0.1 <login>.42.fr`
-Browser shows certificate warning	This is normal — accept it and continue
-WordPress shows "Error establishing database connection"	The MariaDB container may still be starting up; wait 30 seconds and refresh
-Admin login not working	Double-check credentials in `secrets/credentials.txt` and `srcs/.env`
-Changes not saved / site behaving oddly	Check `docker logs wordpress` for PHP or WordPress errors
+
+## Where data is stored
+
+WordPress files and the database are stored on the host machine at:
+
+```
+/home/trpham/data/wordpress/   ← WordPress core files, themes, plugins, uploads
+/home/trpham/data/mariadb/     ← MariaDB database files
+```
+
+These directories persist across `make down` and `make` restarts. They are only removed by `make clean`.
+
+---
+
+## Troubleshooting
+
+| Symptom | What to try |
+|---|---|
+| Browser says "site can't be reached" | Run `docker ps` — are all three containers `Up`? Check that `/etc/hosts` has `127.0.0.1 trpham.42.fr` |
+| Browser shows a certificate warning | Normal — accept it and continue to the site |
+| "Error establishing database connection" on the WordPress page | MariaDB may still be initialising; wait 30–60 seconds and refresh |
+| Admin login not working | Double-check `WORDPRESS_ADMIN` and `WORDPRESS_ADMIN_PASSWORD` in `srcs/.env` |
+| Site loads but looks broken (no styles) | Check `docker logs nginx` for errors; make sure the WordPress volume is mounted correctly |
+| Containers keep restarting | Run `docker logs <container_name>` to see the error; likely a misconfigured `.env` variable |

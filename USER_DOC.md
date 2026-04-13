@@ -1,10 +1,10 @@
 # USER_DOC — User Documentation
 
-This document explains how to use and operate the Inception infrastructure as an end user or administrator. No Docker knowledge is required.
+This document explains how to use and operate the Inception infrastructure as an end user or administrator.
 
 ---
 
-## What services does this stack provide?
+## Services provided
 
 The project runs a fully functional WordPress website accessible over HTTPS. Three services work together inside Docker containers:
 
@@ -28,7 +28,7 @@ All commands are run from the **root of the project directory** on your virtual 
 make
 ```
 
-On the first run this builds all Docker images and may take a few minutes. WordPress is also installed automatically during this first startup — wait until all three containers show as `Up` before opening your browser.
+On the first run this builds all Docker images and may take a few minutes. WordPress is also installed automatically during this first startup. All the images, containers and volumes should be ready when the process is done.
 
 ### Stop the project (data preserved)
 
@@ -38,14 +38,21 @@ make down
 
 Stops all containers. Your website content and database are fully preserved and will be there when you start again.
 
-### Full reset (removes all data)
+OR
 
 ```bash
 make clean
 ```
 
-> **Warning:** this removes all containers, images, and all stored data including the WordPress database and files. The next `make` will start from a completely blank state.
+> **Warning:** this is similar to ```bash make down ```
 
+### Full reset (removes all data)
+
+```bash
+make fclean
+```
+
+> **Warning:** this will run ```bash make clean ``` first, then forcefully removes your data directories saved on your host machine and all unused Docker resources. This is a full reset. 
 ---
 
 ## Accessing the website
@@ -70,18 +77,22 @@ Log in with the administrator credentials defined in `srcs/.env`.
 
 ## Credentials
 
-All credentials are stored in `srcs/.env` at the root of the project. This file is never committed to Git.
+All credentials are stored in `srcs/.env`. This file is never committed to Git.
 
 | What | Variable in .env |
 |---|---|
+| Database root password | `MYSQL_ROOT_PASSWORD` |
+| WordPress title | `WORDPRESS_TITLE` |
+| Database name | `WORDPRESS_DATABASE_NAME` |
+| Database password | `WORDPRESS_DATABASE_PASSWORD` |
+| Database user | `WORDPRESS_DATABASE_USER` |
+| Database user password | `WORDPRESS_DATABASE_USER_PASSWORD` |
 | WordPress admin username | `WORDPRESS_ADMIN` |
 | WordPress admin password | `WORDPRESS_ADMIN_PASSWORD` |
 | WordPress admin email | `WORDPRESS_ADMIN_EMAIL` |
 | WordPress regular user | `WORDPRESS_USER` |
-| Database name | `WORDPRESS_DATABASE_NAME` |
-| Database user | `WORDPRESS_DATABASE_USER` |
-| Database user password | `WORDPRESS_DATABASE_USER_PASSWORD` |
-| Database root password | `MYSQL_ROOT_PASSWORD` |
+| WordPress regular user password | `WORDPRESS_USER_PASSWORD` |
+| WordPress regular user email | `WORDPRESS_USER_EMAIL` |
 
 > Keep `srcs/.env` private. Never push it to any remote repository.
 

@@ -4,7 +4,7 @@
 
 ## Description
 
-Inception is a system administration project from the 42 school curriculum. The goal is to build a small but complete web infrastructure using Docker and Docker Compose, entirely inside a virtual machine. Rather than relying on pre-built images from Docker Hub, each service has its own custom `Dockerfile`, all built on **Alpine 3.22.3**.
+Inception is project from Hive Helsinki, with the goal is to build a small web infrastructure using Docker and Docker Compose, entirely inside a virtual machine. Without using pre-built images from Docker Hub, each service has its own custom `Dockerfile` to build its own container's image, all built on **Alpine 3.22.3**.
 
 The stack consists of three services running in isolated containers:
 
@@ -57,23 +57,24 @@ This project uses named volumes configured with `driver: local` and `driver_opts
 
 3. Create `srcs/.env` with the following variables (this file must stay out of git):
    ```env
-   DOMAIN_NAME=trpham.42.fr
-   WORDPRESS_TITLE=My Inception Site
+   DOMAIN_NAME=<yourlogin>.42.fr
+   WORDPRESS_TITLE=<wordpress name>
 
-   MYSQL_ROOT_PASSWORD=yourRootPassword
+   MYSQL_ROOT_PASSWORD=<yourRootPassword>
 
-   WORDPRESS_DATABASE_NAME=wordpress
-   WORDPRESS_DATABASE_USER=yourDbUser
-   WORDPRESS_DATABASE_USER_PASSWORD=yourDbPassword
+   WORDPRESS_DATABASE_NAME=<wordpressDbName>
+   WORDPRESS_DATABASE_USER=<yourDbUser>
+   WORDPRESS_DATABASE_USER_PASSWORD=<yourDbPassword>
 
-   WORDPRESS_ADMIN=yourAdminUsername
-   WORDPRESS_ADMIN_PASSWORD=yourAdminPassword
-   WORDPRESS_ADMIN_EMAIL=admin@trpham.42.fr
+   WORDPRESS_ADMIN=<yourAdminUsername>
+   WORDPRESS_ADMIN_PASSWORD=<yourAdminPassword>
+   WORDPRESS_ADMIN_EMAIL=<adminEmail>
 
-   WORDPRESS_USER=yourUsername
-   WORDPRESS_USER_PASSWORD=yourUserPassword
-   WORDPRESS_USER_EMAIL=user@trpham.42.fr
+   WORDPRESS_USER=<yourUsername>
+   WORDPRESS_USER_PASSWORD=<yourUserPassword>
+   WORDPRESS_USER_EMAIL=<userEmail>
    ```
+   
    > `WORDPRESS_ADMIN` must **not** contain `admin` or `administrator`.
 
 4. Add the domain to `/etc/hosts` on your VM:
@@ -107,14 +108,13 @@ Once running, visit `https://trpham.42.fr` in your browser and accept the self-s
 - [MariaDB docs](https://mariadb.com/kb/en/documentation/)
 - [php-fpm configuration](https://www.php.net/manual/en/install.fpm.configuration.php)
 - [Best practices for writing Dockerfiles](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
-- [PID 1 and Docker](https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/)
 
 ### How AI was used
 
 AI assistance (Claude) was used in the following parts of this project:
 
-- **Documentation**: generating the initial structure and full content of `README.md`, `USER_DOC.md`, and `DEV_DOC.md`, then reviewed and adjusted to match the actual implementation.
-- **Dockerfile research**: asking for explanations of `CMD` vs `ENTRYPOINT` exec form, PID 1 behaviour, and Alpine package names for php83 and MariaDB.
-- **Script logic**: discussing the MariaDB init-file approach and the WP-CLI flow for idempotent WordPress setup.
+- **Dockerfile research**: explaning the concepts relating to dockerfile, docker-compose, network, volume, etc.
+- **Documentation**: assisting in creating `README.md`, `USER_DOC.md`, and `DEV_DOC.md`.
+- **Debugging**: debugging errors encountering when building Dockerfile, docker-compose for Nginx, Wordpress and Mariadb.
 
 All AI-generated content was reviewed, tested, and validated before inclusion. Nothing was copy-pasted without understanding.

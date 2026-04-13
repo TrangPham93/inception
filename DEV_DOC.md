@@ -6,7 +6,7 @@ This document explains how to set up, build, and manage the Inception project fr
 
 ## Prerequisites
 
-The following must be available on your virtual machine before starting:
+The following must be available on your host machine (virtual machine in my case) before starting:
 
 - Linux OS (this project uses Alpine 3.22.3 as the base for all containers)
 - Docker Engine (>= 20.x) and the Docker Compose plugin (`docker compose`)
@@ -20,32 +20,36 @@ The following must be available on your virtual machine before starting:
 
 ```
 .
+├── DEV_DOC.md
 ├── Makefile
-└── srcs/
-    ├── .env                        # all environment variables and credentials (git-ignored)
-    ├── .gitignore                  # ignores .env
+├── README.md
+├── USER_DOC.md
+├── .gitignore  
+└── srcs
     ├── docker-compose.yml
-    └── requirements/
-        ├── mariadb/
+    ├── .env                         # all environment variables and credentials (git-ignored)
+    ├── .gitignore                   # ignores .env
+    └── requirements
+        ├── mariadb
         │   ├── Dockerfile
-        │   ├── .dockerignore
-        │   ├── conf/
+        |   ├── .dockerignore
+        │   ├── conf
         │   │   └── mariadb.cnf     # [mysqld] config: datadir, socket, bind-address, port
-        │   └── tools/
-        │       └── mariadb-script.sh   # init db, create user, start mariadbd
-        ├── nginx/
+        │   └── tools
+        │   |   └── mariadb-script.sh # init db, create user, start mariadbd
+        ├── nginx
         │   ├── Dockerfile
-        │   ├── .dockerignore
-        │   ├── conf/
-        │   │   └── nginx.conf      # TLSv1.3, fastcgi_pass to wordpress:9000
-        │   └── tools/              # (empty — no entrypoint script needed)
-        └── wordpress/
+        │   ├── conf
+        │   |   ├── nginx.conf      # TLSv1.3, fastcgi_pass to wordpress:9000
+        |   ├── .dockerignore
+        └── wordpress
             ├── Dockerfile
             ├── .dockerignore
-            ├── conf/
+            ├── conf
             │   └── www.conf        # php-fpm pool: listen 9000, www-data user
-            └── tools/
+            └── tools
                 └── wordpress-script.sh  # wait for db, WP-CLI install, exec php-fpm83
+
 ```
 
 ---
@@ -55,58 +59,34 @@ The following must be available on your virtual machine before starting:
 ### 1. Clone the repository
 
 ```bash
-git clone <your_repo_url>
-cd inception1
+git clone <repo_url> inception
+cd inception
 ```
 
-### 2. Create host data directories
-
-The two Docker volumes bind-mount to these paths. They must exist before the first `make`:
-
-```bash
-mkdir -p /home/trpham/data/mariadb
-mkdir -p /home/trpham/data/wordpress
-```
-
-### 3. Create srcs/.env
+### 2. Create srcs/.env
 
 This file is git-ignored and must be created manually. The variable names must match exactly what the scripts expect:
 
 ```env
 DOMAIN_NAME=trpham.42.fr
-WORDPRESS_TITLE=My Inception Site
 
-MYSQL_ROOT_PASSWORD=yourRootPassword
+MYSQL_ROOT_PASSWORD=4242
 
-WORDPRESS_DATABASE_NAME=wordpress
-WORDPRESS_DATABASE_USER=yourDbUser
-WORDPRESS_DATABASE_USER_PASSWORD=yourDbPassword
+WORDPRESS_TITLE=inception_wp
+WORDPRESS_DATABASE_NAME=wordpress_db
+WORDPRESS_DATABASE_PASSWORD=4242
 
-WORDPRESS_ADMIN=yourAdminUsername
-WORDPRESS_ADMIN_PASSWORD=yourAdminPassword
-WORDPRESS_ADMIN_EMAIL=admin@trpham.42.fr
+WORDPRESS_DATABASE_USER=trpham
+WORDPRESS_DATABASE_USER_PASSWORD=4242
 
-WORDPRESS_USER=yourUsername
-WORDPRESS_USER_PASSWORD=yourUserPassword
-WORDPRESS_USER_EMAIL=user@trpham.42.fr
+WORDPRESS_ADMIN=athena
+WORDPRESS_ADMIN_PASSWORD=4242
+WORDPRESS_ADMIN_EMAIL=hatrangc2@gmail.com
+
+WORDPRESS_USER=editor
+WORDPRESS_USER_PASSWORD=4242
+WORDPRESS_USER_EMAIL=trpham@student.hive.fi
 ```
-
-Variable usage by service:
-
-| Variable | Used by |
-|---|---|
-| `MYSQL_ROOT_PASSWORD` | MariaDB script (sets root password), docker-compose healthcheck |
-| `WORDPRESS_DATABASE_NAME` | MariaDB script (creates DB), WordPress script (wp config create) |
-| `WORDPRESS_DATABASE_USER` | MariaDB script (creates user), WordPress script |
-| `WORDPRESS_DATABASE_USER_PASSWORD` | MariaDB script, WordPress script (db ping + wp config) |
-| `DOMAIN_NAME` | WordPress script (`--url` for wp core install) |
-| `WORDPRESS_TITLE` | WordPress script (`--title`) |
-| `WORDPRESS_ADMIN` | WordPress script (`--admin_user`) — must not contain `admin`/`administrator` |
-| `WORDPRESS_ADMIN_PASSWORD` | WordPress script |
-| `WORDPRESS_ADMIN_EMAIL` | WordPress script |
-| `WORDPRESS_USER` | WordPress script (`wp user create`) |
-| `WORDPRESS_USER_PASSWORD` | WordPress script |
-| `WORDPRESS_USER_EMAIL` | WordPress script |
 
 ### 4. Configure /etc/hosts
 
@@ -121,10 +101,11 @@ echo "127.0.0.1   trpham.42.fr" | sudo tee -a /etc/hosts
 All operations go through the `Makefile` at the project root.
 
 ```bash
-make        # docker compose up --build -d
+make        # create mariadb and wordpress data folder, docker compose up build and up
 make down   # docker compose down
-make clean  # docker compose down -v + docker rmi + rm host data dirs
-make re     # make clean && make
+make clean  # docker compose down 
+make fclean # docker compose clean, remove the data directories, @docker system prune -f --volumes  
+make re     # make fclean && make
 ```
 
 To run manually without the Makefile:
@@ -226,33 +207,7 @@ docker compose -f srcs/docker-compose.yml up --build -d wordpress
 | MariaDB database files | `mariadb` | `/home/trpham/data/mariadb` |
 | WordPress site files | `wordpress` | `/home/trpham/data/wordpress` |
 
-Both volumes use `driver: local` with `type: none` and `o: bind`, which makes them backed by specific host directories. Data survives `docker compose down` but is removed if you delete the host directories or run `make clean`.
+Both volumes use `driver: local` with `type: none` and `o: bind`, which makes them backed by specific host directories. Data survives `docker compose down` but is removed if you delete the host directories or run `make fclean`.
 
 The `wordpress` volume is shared between the `wordpress` and `nginx` containers (both mount it at `/var/www/html`).
 
----
-
-## Key implementation notes
-
-- **Alpine 3.22.3** is the base image for all three services. No pre-built application images are used.
-- **No `latest` tag** anywhere in the project.
-- **No passwords in Dockerfiles** — all credentials come from `srcs/.env` via `env_file` in `docker-compose.yml`.
-- **PID 1**: every container runs its main process as PID 1 using `exec` at the end of entrypoint scripts (`exec mariadbd ...`, `exec php-fpm83 -F`) or via `CMD` exec form for NGINX. This ensures proper signal handling and clean shutdown.
-- **No hacky infinite loops**: no `tail -f`, `sleep infinity`, or `while true` in any entrypoint.
-- **Restart policy**: all services use `restart: unless-stopped`.
-- **No `network: host` or `--link`**: all inter-container communication uses the named bridge network `docker-network`, with service names as hostnames.
-- **Startup ordering**: `wordpress` depends on `mariadb` with `condition: service_healthy`. `nginx` depends on `wordpress` (starts after it). The WordPress script also actively waits for MariaDB with `mariadb-admin ping --wait=300`.
-
----
-
-## Common issues
-
-| Problem | Likely cause | Fix |
-|---|---|---|
-| `https://trpham.42.fr` unreachable | `/etc/hosts` not set or containers not running | Check `docker ps`; verify `/etc/hosts` entry |
-| Browser shows certificate warning | Self-signed cert not trusted | Expected — click "Advanced" and proceed |
-| WordPress shows "Error establishing database connection" | MariaDB not yet ready or wrong credentials | Check `docker logs mariadb`; verify `.env` variable names match script expectations |
-| `wp-cli.phar` download fails | No internet access from container | Check VM network connectivity |
-| MariaDB data directory not created | Host path `/home/trpham/data/mariadb` missing | Run `mkdir -p /home/trpham/data/mariadb` before `make` |
-| WordPress already installed but script re-runs install | `wp-config.php` was deleted from volume | Volume data was wiped — this is expected on `make clean` |
-| Permission denied on `/var/www/html` | Ownership not set to `www-data` | Script sets `chown -R www-data:www-data /var/www/html` at the end; check logs for errors before that step |

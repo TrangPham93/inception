@@ -18,7 +18,7 @@ wordpress_data:
 
 # looking for -f file .yml in the srcs dir
 build:
-	docker compose -f $(DOCKER_COMPOSE) build
+	docker compose -f $(DOCKER_COMPOSE) build --no-cache
 
 up:
 	docker compose -f $(DOCKER_COMPOSE) up -d

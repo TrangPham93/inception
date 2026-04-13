@@ -36,12 +36,11 @@ services:
     volumes:
       - wordpress:/var/www/html
     depends_on:
-      - wordpress
+      wordpress:
+        condition: service_healthy  
     networks:
       - network
-    extra_hosts:
-      - "trpham.42.fr:127.0.0.1"
-     
+
   wordpress:
     container_name: wordpress
     build: ./requirements/wordpress
@@ -57,10 +56,11 @@ services:
     networks:
       - network
     healthcheck:
-      test: ["CMD", "test", "-f", "/var/www/html/wp-login.php"]
+      test: ["CMD", "nc", "-z", "localhost", "9000"]   
       interval: 5s
-      timeout: 60s
-      retries: 10
+      timeout: 10s
+      retries: 20
+      start_period: 30s
 
 networks:
   network:
@@ -82,8 +82,3 @@ volumes:
       type: none
       o: bind
       device: /home/trpham/data/wordpress
-
-  
-
- 
- 

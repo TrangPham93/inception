@@ -169,7 +169,7 @@ WordPress files and the database are stored on the host machine at:
 /home/trpham/data/mariadb/     ← MariaDB database files
 ```
 
-These directories persist across `make down` and `make` restarts. They are only removed by `make clean`.
+These directories persist across `make down` and `make` restarts. They are only removed by `make fclean`.
 
 ---
 

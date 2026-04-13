@@ -14,12 +14,6 @@ The following must be available on your virtual machine before starting:
 - `git`
 - A user with permission to run Docker, or root access
 
-To install Docker on a Debian-based VM:
-```bash
-sudo apt update && sudo apt install -y docker.io docker-compose-plugin
-sudo usermod -aG docker $USER && newgrp docker
-```
-
 ---
 
 ## Repository structure

@@ -61,6 +61,7 @@ This project uses named volumes configured with `driver: local` and `driver_opts
    WORDPRESS_TITLE=<wordpress name>
 
    MYSQL_ROOT_PASSWORD=<yourRootPassword>
+   DB_PORT=<databasePort>
 
    WORDPRESS_DATABASE_NAME=<wordpressDbName>
    WORDPRESS_DATABASE_USER=<yourDbUser>

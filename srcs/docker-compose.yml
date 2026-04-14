@@ -17,8 +17,7 @@ services:
           "ping",
           "-h",
           "localhost",
-          "-P",
-          "3306",
+          "-P ${DB_PORT}",
           "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"
         ]
       interval: 10s

@@ -10,7 +10,10 @@ wget -q https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.pha
 chmod +x /usr/local/bin/wp
 
 echo "Waiting for MariaDB to be ready..."
-mariadb-admin ping --protocol=tcp --host=mariadb -u $WORDPRESS_DATABASE_USER --password=$WORDPRESS_DATABASE_USER_PASSWORD --wait=300
+mariadb-admin ping --protocol=tcp --host=mariadb --port=${DB_PORT} \
+    -u $WORDPRESS_DATABASE_USER \
+    --password=$WORDPRESS_DATABASE_USER_PASSWORD \
+    --wait=300
 
 if [ ! -f /var/www/html/wp-settings.php ]; then
     echo "Downloading WordPress core files..."
@@ -23,7 +26,7 @@ if [ ! -f /var/www/html/wp-config.php ]; then
         --dbname=$WORDPRESS_DATABASE_NAME \
         --dbuser=$WORDPRESS_DATABASE_USER \
         --dbpass=$WORDPRESS_DATABASE_USER_PASSWORD \
-        --dbhost=mariadb \
+        --dbhost=mariadb:${DB_PORT} \
         --allow-root \
         --force
 

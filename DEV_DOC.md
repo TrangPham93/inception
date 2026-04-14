@@ -71,6 +71,7 @@ This file is git-ignored and must be created manually. The variable names must m
 DOMAIN_NAME=trpham.42.fr
 
 MYSQL_ROOT_PASSWORD=4242
+DB_PORT=3306
 
 WORDPRESS_TITLE=inception_wp
 WORDPRESS_DATABASE_NAME=wordpress_db

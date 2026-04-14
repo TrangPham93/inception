@@ -82,6 +82,7 @@ All credentials are stored in `srcs/.env`. This file is never committed to Git.
 | What | Variable in .env |
 |---|---|
 | Database root password | `MYSQL_ROOT_PASSWORD` |
+| Database port | `DB_PORT` |
 | WordPress title | `WORDPRESS_TITLE` |
 | Database name | `WORDPRESS_DATABASE_NAME` |
 | Database password | `WORDPRESS_DATABASE_PASSWORD` |
